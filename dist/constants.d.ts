@@ -18,8 +18,11 @@ export declare enum Rounding {
     ROUND_HALF_UP = 1,
     ROUND_UP = 2
 }
-export declare const FACTORY_ADDRESS = "0x5e79a2ee81eE7c223fA6adDC6785BDd2f16C71d0";
-export declare const INIT_CODE_HASH = "0xed59b142a3684efd52c0fcc6f19e7a5d1f5a0323bb4785beeedfa5a393561034";
+export declare const FACTORY_ADDRESS: {
+    3: string;
+    97: string;
+};
+export declare const INIT_CODE_HASH = "0xc10b1993f530f6a1f8b6c43a8d8f44af41e4a0024cf04c11920de2386381d45b";
 export declare const MINIMUM_LIQUIDITY: JSBI;
 export declare const ZERO: JSBI;
 export declare const ONE: JSBI;
@@ -28,8 +31,8 @@ export declare const THREE: JSBI;
 export declare const FIVE: JSBI;
 export declare const TEN: JSBI;
 export declare const _100: JSBI;
-export declare const _997: JSBI;
-export declare const _1000: JSBI;
+export declare const _9975: JSBI;
+export declare const _10000: JSBI;
 export declare enum SolidityType {
     uint8 = "uint8",
     uint256 = "uint256"

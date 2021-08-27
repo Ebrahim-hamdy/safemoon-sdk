@@ -18,11 +18,11 @@ export declare enum Rounding {
     ROUND_HALF_UP = 1,
     ROUND_UP = 2
 }
-export declare const FACTORY_ADDRESS: {
-    3: string;
-    97: string;
+declare type ChainAddress = {
+    [chainId in ChainId]: string;
 };
-export declare const INIT_CODE_HASH = "0xc10b1993f530f6a1f8b6c43a8d8f44af41e4a0024cf04c11920de2386381d45b";
+export declare const FACTORY_ADDRESS: ChainAddress;
+export declare const INIT_CODE_HASH: ChainAddress;
 export declare const MINIMUM_LIQUIDITY: JSBI;
 export declare const ZERO: JSBI;
 export declare const ONE: JSBI;
@@ -41,3 +41,4 @@ export declare const SOLIDITY_TYPE_MAXIMA: {
     uint8: JSBI;
     uint256: JSBI;
 };
+export {};

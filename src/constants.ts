@@ -24,12 +24,28 @@ export enum Rounding {
   ROUND_UP
 }
 
-export const FACTORY_ADDRESS = {
-  [ChainId.ROPSTEN]: "0x07E54EE143772c62133be74221B521BFD660E6a0",
-  [ChainId.BSC_TESTNET]: "0xc7b33eDc1Cf696943699c8017fD951C422EDf6AE"
+type ChainAddress = {
+  [chainId in ChainId]: string
+}
+export const FACTORY_ADDRESS: ChainAddress = {
+  [ChainId.MAINNET]: "",
+  [ChainId.ROPSTEN]: "0xDfD8bbA37423950bD8050C65E698610C57E55cea",
+  [ChainId.RINKEBY]: "",
+  [ChainId.GÖRLI]: "",
+  [ChainId.KOVAN]: "",
+  [ChainId.BSC_MAINNET]: "0x26023843814cFF92B8d75311d64D1C032b8b29f2",
+  [ChainId.BSC_TESTNET]: "0x5F8018088bB686598a77211E611c3b9DEE558e81"
 }
 
-export const INIT_CODE_HASH = '0xc10b1993f530f6a1f8b6c43a8d8f44af41e4a0024cf04c11920de2386381d45b'
+export const INIT_CODE_HASH: ChainAddress = {
+  [ChainId.MAINNET]: "",
+  [ChainId.ROPSTEN]: '0x8b4ce8ec78a7c1be0d482d641f59b942070725a4b7782595db30956c6d46e824',
+  [ChainId.RINKEBY]: "",
+  [ChainId.GÖRLI]: "",
+  [ChainId.KOVAN]: "",
+  [ChainId.BSC_MAINNET]: "0x34ee7037c3427b8b7554493c355c7291c956a3abeb7a764c6a208e3eec81f32c",
+  [ChainId.BSC_TESTNET]: '0x8b4ce8ec78a7c1be0d482d641f59b942070725a4b7782595db30956c6d46e824'
+}
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
 

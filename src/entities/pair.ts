@@ -19,7 +19,7 @@ import {
 } from '../constants'
 import { parseBigintIsh, sqrt } from '../utils'
 import { InsufficientInputAmountError, InsufficientReservesError } from '../errors'
-import { Token, WETH } from './token'
+import { Token } from './token'
 
 let PAIR_ADDRESS_CACHE: { [token0Address: string]: { [token1Address: string]: string } } = {}
 
@@ -137,18 +137,20 @@ export class Pair {
 
     const inputReserve = this.reserveOf(inputAmount.token)
 
-    // const outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0)
+    const outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0)
 
-    let outputReserve: any
-    try {
-      outputReserve = this.reserveOf(WETH[97])
-    } catch (err) {
-      outputReserve = this.reserveOf(inputAmount.token)
-    }
+    // let outputReserve: any
+    // try {
+    //   outputReserve = this.reserveOf(WETH[97])
+    // } catch (err) {
+    //   outputReserve = this.reserveOf(inputAmount.token)
+    // }
 
-    const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
+    // const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
+    const inputAmountWithFee = inputAmount.raw
     const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-    const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
+    const denominator = JSBI.add(inputReserve.raw, inputAmountWithFee)
+    // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
     const outputAmount = new TokenAmount(
       inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
       JSBI.divide(numerator, denominator)
@@ -171,13 +173,13 @@ export class Pair {
 
     const outputReserve = this.reserveOf(outputAmount.token)
 
-    let inputReserve: any
-    try {
-      inputReserve = this.reserveOf(WETH[97])
-    } catch (err) {
-      inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-    }
-    // const inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
+    // let inputReserve: any
+    // try {
+    //   inputReserve = this.reserveOf(WETH[97])
+    // } catch (err) {
+    //   inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
+    // }
+    const inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
     const numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000)
     const denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _9975)
     const inputAmount = new TokenAmount(

@@ -1429,6 +1429,8 @@ var Router = /*#__PURE__*/function () {
     });
     var deadline = "0x" + (Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16);
     var useFeeOnTransfer = Boolean(options.feeOnTransfer);
+    var fee = options === null || options === void 0 ? void 0 : options.fee;
+    console.log(fee);
     var methodName;
     var args;
     var value;

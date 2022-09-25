@@ -27,6 +27,8 @@ export interface TradeOptions {
    * Whether any of the tokens in the path are fee on transfer tokens, which should be handled with special methods
    */
   feeOnTransfer?: boolean
+
+  fee?: string
 }
 
 /**
@@ -79,6 +81,8 @@ export abstract class Router {
     const path: string[] = trade.route.path.map(token => token.address)
     const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16)}`
     const useFeeOnTransfer = Boolean(options.feeOnTransfer)
+    const fee = options?.fee
+    console.log(fee)
 
     let methodName: string
     let args: (string | string[])[]

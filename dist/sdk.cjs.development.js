@@ -39,8 +39,8 @@ var _FACTORY_ADDRESS, _INIT_CODE_HASH, _SOLIDITY_TYPE_MAXIMA;
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(exports.Rounding || (exports.Rounding = {}));
 
-var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[exports.ChainId.MAINNET] = '0x26023843814cFF92B8d75311d64D1C032b8b29f2', _FACTORY_ADDRESS[exports.ChainId.ROPSTEN] = '0xDfD8bbA37423950bD8050C65E698610C57E55cea', _FACTORY_ADDRESS[exports.ChainId.RINKEBY] = '', _FACTORY_ADDRESS[exports.ChainId.GÖRLI] = '', _FACTORY_ADDRESS[exports.ChainId.KOVAN] = '', _FACTORY_ADDRESS[exports.ChainId.BSC_MAINNET] = '0x86A859773cf6df9C8117F20b0B950adA84e7644d', _FACTORY_ADDRESS[exports.ChainId.BSC_TESTNET] = '0x6D80876705002E22768df9F391c9Ac36bbb3492c', _FACTORY_ADDRESS);
-var INIT_CODE_HASH = (_INIT_CODE_HASH = {}, _INIT_CODE_HASH[exports.ChainId.MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[exports.ChainId.ROPSTEN] = '0x8b4ce8ec78a7c1be0d482d641f59b942070725a4b7782595db30956c6d46e824', _INIT_CODE_HASH[exports.ChainId.RINKEBY] = '', _INIT_CODE_HASH[exports.ChainId.GÖRLI] = '', _INIT_CODE_HASH[exports.ChainId.KOVAN] = '', _INIT_CODE_HASH[exports.ChainId.BSC_MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[exports.ChainId.BSC_TESTNET] = '0x1d948e2730fd4eb565140100eedd0d12f6ac5b0d4cac2a421066cd4338f603ef', _INIT_CODE_HASH);
+var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[exports.ChainId.MAINNET] = '0x26023843814cFF92B8d75311d64D1C032b8b29f2', _FACTORY_ADDRESS[exports.ChainId.ROPSTEN] = '0xDfD8bbA37423950bD8050C65E698610C57E55cea', _FACTORY_ADDRESS[exports.ChainId.RINKEBY] = '', _FACTORY_ADDRESS[exports.ChainId.GÖRLI] = '', _FACTORY_ADDRESS[exports.ChainId.KOVAN] = '', _FACTORY_ADDRESS[exports.ChainId.BSC_MAINNET] = '0x86A859773cf6df9C8117F20b0B950adA84e7644d', _FACTORY_ADDRESS[exports.ChainId.BSC_TESTNET] = '0x8B9cfC2b1bCE8BD98e829858f923451FC4aE75Fe', _FACTORY_ADDRESS);
+var INIT_CODE_HASH = (_INIT_CODE_HASH = {}, _INIT_CODE_HASH[exports.ChainId.MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[exports.ChainId.ROPSTEN] = '0x8b4ce8ec78a7c1be0d482d641f59b942070725a4b7782595db30956c6d46e824', _INIT_CODE_HASH[exports.ChainId.RINKEBY] = '', _INIT_CODE_HASH[exports.ChainId.GÖRLI] = '', _INIT_CODE_HASH[exports.ChainId.KOVAN] = '', _INIT_CODE_HASH[exports.ChainId.BSC_MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[exports.ChainId.BSC_TESTNET] = '0x6b196bce7ffe32f3dd0bcae8f4b45fa72128dc0e25b88461174d085751e94d71', _INIT_CODE_HASH);
 var MINIMUM_LIQUIDITY = /*#__PURE__*/JSBI.BigInt(1000); // exports for internal consumption
 
 var ZERO = /*#__PURE__*/JSBI.BigInt(0);
@@ -840,12 +840,12 @@ var Pair = /*#__PURE__*/function () {
     // } catch (err) {
     //   outputReserve = this.reserveOf(inputAmount.token)
     // }
-    // const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
 
-    var inputAmountWithFee = inputAmount.raw;
-    var numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw);
-    var denominator = JSBI.add(inputReserve.raw, inputAmountWithFee); // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
+    var inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975); // const inputAmountWithFee = inputAmount.raw
 
+    var numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw); // const denominator = JSBI.add(inputReserve.raw, inputAmountWithFee)
+
+    var denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee);
     var outputAmount = new TokenAmount(inputAmount.token.equals(this.token0) ? this.token1 : this.token0, JSBI.divide(numerator, denominator));
 
     if (JSBI.equal(outputAmount.raw, ZERO)) {
@@ -1447,22 +1447,27 @@ var Router = /*#__PURE__*/function () {
 
           args = [amountIn, amountOut, path, to, deadline]; // value = `0x${(2500000000000000).toString(16)}`
           // value = JSBI.multiply(amountOut, _9975)
-
-          var inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25));
-          value = "0x" + // JSBI.subtract(
-          // trade.maximumAmountIn(options.allowedSlippage).raw,
-          JSBI.divide(inputAmountWithFee, JSBI.BigInt(10000)) // )
-          .toString(16);
-          console.log(value); // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
+          // const inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25))
+          // value = `0x${
+          //   // JSBI.subtract(
+          //   // trade.maximumAmountIn(options.allowedSlippage).raw,
+          //   JSBI.divide(inputAmountWithFee, JSBI.BigInt(10000))
+          //     // )
+          //     .toString(16)
+          // }`
+          // console.log(value)
+          // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
           // const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
           // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
           // value = `0x${(parseInt(amountOut) - (parseInt(amountOut) * 9975) / 10000).toString(16)}`
-          // value = ZERO_HEX
+
+          value = fee ? fee : ZERO_HEX; // value = ZERO_HEX
         } else {
           methodName = useFeeOnTransfer ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens' : 'swapExactTokensForTokens'; // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
 
-          args = [amountIn, amountOut, path, to, deadline];
-          value = ZERO_HEX;
+          args = [amountIn, amountOut, path, to, deadline]; // value = ZERO_HEX
+
+          value = fee ? fee : ZERO_HEX;
         }
 
         break;
@@ -1478,19 +1483,15 @@ var Router = /*#__PURE__*/function () {
         } else if (etherOut) {
           methodName = 'swapTokensForExactETH'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
 
-          args = [amountOut, amountIn, path, to, deadline];
+          args = [amountOut, amountIn, path, to, deadline]; // value = ZERO_HEX
 
-          var _inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25));
-
-          value = "0x" + // JSBI.subtract(
-          // trade.maximumAmountIn(options.allowedSlippage).raw,
-          JSBI.divide(_inputAmountWithFee, JSBI.BigInt(10000)) // )
-          .toString(16); // value = ZERO_HEX
+          value = fee ? fee : ZERO_HEX;
         } else {
           methodName = 'swapTokensForExactTokens'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
 
-          args = [amountOut, amountIn, path, to, deadline];
-          value = ZERO_HEX;
+          args = [amountOut, amountIn, path, to, deadline]; // value = ZERO_HEX
+
+          value = fee ? fee : ZERO_HEX;
         }
 
         break;

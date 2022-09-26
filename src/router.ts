@@ -1,6 +1,6 @@
 import { TradeType } from './constants'
 import invariant from 'tiny-invariant'
-import JSBI from 'jsbi'
+// import JSBI from 'jsbi'
 import { validateAndParseAddress } from './utils'
 import { CurrencyAmount, ETHER, Percent, Trade } from './entities'
 
@@ -100,20 +100,21 @@ export abstract class Router {
           args = [amountIn, amountOut, path, to, deadline]
           // value = `0x${(2500000000000000).toString(16)}`
           // value = JSBI.multiply(amountOut, _9975)
-          const inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25))
-          value = `0x${
-            // JSBI.subtract(
-            // trade.maximumAmountIn(options.allowedSlippage).raw,
-            JSBI.divide(inputAmountWithFee, JSBI.BigInt(10000))
-              // )
-              .toString(16)
-          }`
-          console.log(value)
+          // const inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25))
+          // value = `0x${
+          //   // JSBI.subtract(
+          //   // trade.maximumAmountIn(options.allowedSlippage).raw,
+          //   JSBI.divide(inputAmountWithFee, JSBI.BigInt(10000))
+          //     // )
+          //     .toString(16)
+          // }`
+          // console.log(value)
 
           // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
           // const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
           // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
           // value = `0x${(parseInt(amountOut) - (parseInt(amountOut) * 9975) / 10000).toString(16)}`
+          value = fee ? fee : ZERO_HEX
           // value = ZERO_HEX
         } else {
           methodName = useFeeOnTransfer
@@ -121,7 +122,8 @@ export abstract class Router {
             : 'swapExactTokensForTokens'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
           args = [amountIn, amountOut, path, to, deadline]
-          value = ZERO_HEX
+          // value = ZERO_HEX
+          value = fee ? fee : ZERO_HEX
         }
         break
       case TradeType.EXACT_OUTPUT:
@@ -135,21 +137,14 @@ export abstract class Router {
           methodName = 'swapTokensForExactETH'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
           args = [amountOut, amountIn, path, to, deadline]
-
-          const inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25))
-          value = `0x${
-            // JSBI.subtract(
-            // trade.maximumAmountIn(options.allowedSlippage).raw,
-            JSBI.divide(inputAmountWithFee, JSBI.BigInt(10000))
-              // )
-              .toString(16)
-          }`
           // value = ZERO_HEX
+          value = fee ? fee : ZERO_HEX
         } else {
           methodName = 'swapTokensForExactTokens'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
           args = [amountOut, amountIn, path, to, deadline]
-          value = ZERO_HEX
+          // value = ZERO_HEX
+          value = fee ? fee : ZERO_HEX
         }
         break
     }

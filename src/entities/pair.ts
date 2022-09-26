@@ -146,11 +146,11 @@ export class Pair {
     //   outputReserve = this.reserveOf(inputAmount.token)
     // }
 
-    // const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
-    const inputAmountWithFee = inputAmount.raw
+    const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
+    // const inputAmountWithFee = inputAmount.raw
     const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-    const denominator = JSBI.add(inputReserve.raw, inputAmountWithFee)
-    // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
+    // const denominator = JSBI.add(inputReserve.raw, inputAmountWithFee)
+    const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
     const outputAmount = new TokenAmount(
       inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
       JSBI.divide(numerator, denominator)

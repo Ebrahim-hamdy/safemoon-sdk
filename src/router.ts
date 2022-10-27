@@ -1,6 +1,5 @@
 import { TradeType } from './constants'
 import invariant from 'tiny-invariant'
-// import JSBI from 'jsbi'
 import { validateAndParseAddress } from './utils'
 import { CurrencyAmount, ETHER, Percent, Trade } from './entities'
 
@@ -28,7 +27,10 @@ export interface TradeOptions {
    */
   feeOnTransfer?: boolean
 
-  fee?: string
+  /**
+   * ETH tip for miners
+   */
+  ethTip?: CurrencyAmount
 }
 
 /**
@@ -42,11 +44,19 @@ export interface SwapParameters {
   /**
    * The arguments to pass to the method, all hex encoded.
    */
-  args: (string | string[])[]
+  args: (string | string[] | SafeSwapTrade)[]
   /**
    * The amount of wei to send in hex.
    */
   value: string
+}
+
+export interface SafeSwapTrade {
+  amountIn: string
+  amountOut: string
+  path: string[]
+  to: string
+  deadline: string
 }
 
 function toHex(currencyAmount: CurrencyAmount) {
@@ -74,80 +84,98 @@ export abstract class Router {
     // the router does not support both ether in and out
     invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     invariant(options.ttl > 0, 'TTL')
+    invariant('ethTip' in options && options.ethTip?.currency === ETHER)
 
     const to: string = validateAndParseAddress(options.recipient)
-    const amountIn: string = toHex(trade.maximumAmountIn(options.allowedSlippage))
-    const amountOut: string = toHex(trade.minimumAmountOut(options.allowedSlippage))
+    const amountInCurrency = trade.maximumAmountIn(options.allowedSlippage)
+    const amountIn: string = toHex(amountInCurrency)
+    const amountOutCurrency = trade.minimumAmountOut(options.allowedSlippage)
+    const amountOut: string = toHex(amountOutCurrency)
     const path: string[] = trade.route.path.map(token => token.address)
     const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16)}`
+
+    const ethTip = toHex(options.ethTip)
+    const safeSwapTrade: SafeSwapTrade = { amountIn, amountOut, path, to, deadline }
+
     const useFeeOnTransfer = Boolean(options.feeOnTransfer)
-    const fee = options?.fee
-    console.log(fee)
 
     let methodName: string
-    let args: (string | string[])[]
+    let args: (string | string[] | SafeSwapTrade)[]
     let value: string
+
     switch (trade.tradeType) {
       case TradeType.EXACT_INPUT:
         if (etherIn) {
-          methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'
-          // (uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline]
-          value = amountIn
+          methodName = 'swapExactETHForTokensWithTipAmount'
+          args = [safeSwapTrade, ethTip]
+          value = toHex(amountInCurrency.add(options.ethTip))
         } else if (etherOut) {
-          methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
-          // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline]
-          // value = `0x${(2500000000000000).toString(16)}`
-          // value = JSBI.multiply(amountOut, _9975)
-          // const inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25))
-          // value = `0x${
-          //   // JSBI.subtract(
-          //   // trade.maximumAmountIn(options.allowedSlippage).raw,
-          //   JSBI.divide(inputAmountWithFee, JSBI.BigInt(10000))
-          //     // )
-          //     .toString(16)
-          // }`
-          // console.log(value)
-
-          // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-          // const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-          // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-          // value = `0x${(parseInt(amountOut) - (parseInt(amountOut) * 9975) / 10000).toString(16)}`
-          value = fee ? fee : ZERO_HEX
-          // value = ZERO_HEX
+          methodName = 'swapExactTokensForETHAndTipAmount'
+          args = [safeSwapTrade]
+          value = ethTip
         } else {
-          methodName = useFeeOnTransfer
-            ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens'
-            : 'swapExactTokensForTokens'
-          // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline]
-          // value = ZERO_HEX
-          value = fee ? fee : ZERO_HEX
+          methodName = 'swapExactTokensForTokensWithTipAmount'
+          args = [safeSwapTrade]
+          value = ethTip
         }
         break
       case TradeType.EXACT_OUTPUT:
-        invariant(!useFeeOnTransfer, 'EXACT_OUT_FOT')
         if (etherIn) {
-          methodName = 'swapETHForExactTokens'
-          // (uint amountOut, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline]
-          value = amountIn
+          methodName = 'swapETHForExactTokensWithTipAmount'
+          args = [safeSwapTrade, ethTip]
+          value = toHex(amountInCurrency.add(options.ethTip))
         } else if (etherOut) {
-          methodName = 'swapTokensForExactETH'
-          // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline]
-          // value = ZERO_HEX
-          value = fee ? fee : ZERO_HEX
+          methodName = 'swapTokensForExactETHAndTipAmount'
+          args = [safeSwapTrade]
+          value = ethTip
         } else {
-          methodName = 'swapTokensForExactTokens'
-          // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline]
-          // value = ZERO_HEX
-          value = fee ? fee : ZERO_HEX
+          methodName = 'swapTokensForExactTokensWithTipAmount'
+          args = [safeSwapTrade]
+          value = ethTip
         }
         break
     }
+    // switch (trade.tradeType) {
+    //   case TradeType.EXACT_INPUT:
+    //     if (etherIn) {
+    //       methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'
+    //       // (uint amountOutMin, address[] calldata path, address to, uint deadline)
+    //       args = [amountOut, path, to, deadline]
+    //       value = amountIn
+    //     } else if (etherOut) {
+    //       methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
+    //       // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    //       args = [amountIn, amountOut, path, to, deadline]
+    //       value = ZERO_HEX
+    //     } else {
+    //       methodName = useFeeOnTransfer
+    //         ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens'
+    //         : 'swapExactTokensForTokens'
+    //       // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    //       args = [amountIn, amountOut, path, to, deadline]
+    //       value = ZERO_HEX
+    //     }
+    //     break
+    //   case TradeType.EXACT_OUTPUT:
+    //     invariant(!useFeeOnTransfer, 'EXACT_OUT_FOT')
+    //     if (etherIn) {
+    //       methodName = 'swapETHForExactTokens'
+    //       // (uint amountOut, address[] calldata path, address to, uint deadline)
+    //       args = [amountOut, path, to, deadline]
+    //       value = amountIn
+    //     } else if (etherOut) {
+    //       methodName = 'swapTokensForExactETH'
+    //       // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+    //       args = [amountOut, amountIn, path, to, deadline]
+    //       value = ZERO_HEX
+    //     } else {
+    //       methodName = 'swapTokensForExactTokens'
+    //       // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+    //       args = [amountOut, amountIn, path, to, deadline]
+    //       value = ZERO_HEX
+    //     }
+    //     break
+    // }
     return {
       methodName,
       args,

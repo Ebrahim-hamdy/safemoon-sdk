@@ -15,7 +15,7 @@ import {
   INIT_CODE_HASH,
   MINIMUM_LIQUIDITY,
   ONE,
-  ZERO
+  ZERO,
 } from '../constants'
 import { parseBigintIsh, sqrt } from '../utils'
 import { InsufficientInputAmountError, InsufficientReservesError } from '../errors'
@@ -40,8 +40,8 @@ export class Pair {
             FACTORY_ADDRESS[chainId || tokenA.chainId],
             keccak256(['bytes'], [pack(['address', 'address'], [tokens[0].address, tokens[1].address])]),
             INIT_CODE_HASH[chainId || tokenA.chainId]
-          )
-        }
+          ),
+        },
       }
     }
 
@@ -126,30 +126,10 @@ export class Pair {
     if (JSBI.equal(this.reserve0.raw, ZERO) || JSBI.equal(this.reserve1.raw, ZERO)) {
       throw new InsufficientReservesError()
     }
-    // const isBNB = this.token0.symbol === 'WBNB'
-    // const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
-    // const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-    // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-    // const outputAmount = new TokenAmount(
-    //   inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
-    //   JSBI.divide(numerator, denominator)
-    // )
-
     const inputReserve = this.reserveOf(inputAmount.token)
-
     const outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-
-    // let outputReserve: any
-    // try {
-    //   outputReserve = this.reserveOf(WETH[97])
-    // } catch (err) {
-    //   outputReserve = this.reserveOf(inputAmount.token)
-    // }
-
     const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
-    // const inputAmountWithFee = inputAmount.raw
     const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-    // const denominator = JSBI.add(inputReserve.raw, inputAmountWithFee)
     const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
     const outputAmount = new TokenAmount(
       inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
@@ -172,13 +152,6 @@ export class Pair {
     }
 
     const outputReserve = this.reserveOf(outputAmount.token)
-
-    // let inputReserve: any
-    // try {
-    //   inputReserve = this.reserveOf(WETH[97])
-    // } catch (err) {
-    //   inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-    // }
     const inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
     const numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000)
     const denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _9975)
@@ -218,7 +191,7 @@ export class Pair {
     token: Token,
     totalSupply: TokenAmount,
     liquidity: TokenAmount,
-    feeOn = false,
+    feeOn: boolean = false,
     kLast?: BigintIsh
   ): TokenAmount {
     invariant(this.involvesToken(token), 'TOKEN')

@@ -39,8 +39,8 @@ var Rounding;
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(Rounding || (Rounding = {}));
 
-var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[ChainId.MAINNET] = '0x26023843814cFF92B8d75311d64D1C032b8b29f2', _FACTORY_ADDRESS[ChainId.ROPSTEN] = '0xDfD8bbA37423950bD8050C65E698610C57E55cea', _FACTORY_ADDRESS[ChainId.RINKEBY] = '', _FACTORY_ADDRESS[ChainId.GÖRLI] = '', _FACTORY_ADDRESS[ChainId.KOVAN] = '', _FACTORY_ADDRESS[ChainId.BSC_MAINNET] = '0x86A859773cf6df9C8117F20b0B950adA84e7644d', _FACTORY_ADDRESS[ChainId.BSC_TESTNET] = '0x8B9cfC2b1bCE8BD98e829858f923451FC4aE75Fe', _FACTORY_ADDRESS);
-var INIT_CODE_HASH = (_INIT_CODE_HASH = {}, _INIT_CODE_HASH[ChainId.MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[ChainId.ROPSTEN] = '0x8b4ce8ec78a7c1be0d482d641f59b942070725a4b7782595db30956c6d46e824', _INIT_CODE_HASH[ChainId.RINKEBY] = '', _INIT_CODE_HASH[ChainId.GÖRLI] = '', _INIT_CODE_HASH[ChainId.KOVAN] = '', _INIT_CODE_HASH[ChainId.BSC_MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[ChainId.BSC_TESTNET] = '0x6b196bce7ffe32f3dd0bcae8f4b45fa72128dc0e25b88461174d085751e94d71', _INIT_CODE_HASH);
+var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[ChainId.MAINNET] = '0x26023843814cFF92B8d75311d64D1C032b8b29f2', _FACTORY_ADDRESS[ChainId.ROPSTEN] = '0xDfD8bbA37423950bD8050C65E698610C57E55cea', _FACTORY_ADDRESS[ChainId.RINKEBY] = '', _FACTORY_ADDRESS[ChainId.GÖRLI] = '', _FACTORY_ADDRESS[ChainId.KOVAN] = '', _FACTORY_ADDRESS[ChainId.BSC_MAINNET] = '0x86A859773cf6df9C8117F20b0B950adA84e7644d', _FACTORY_ADDRESS[ChainId.BSC_TESTNET] = '0xbdbD5304508C4A38935f5E9FC9D2C1Fa8C2D2bb8', _FACTORY_ADDRESS);
+var INIT_CODE_HASH = (_INIT_CODE_HASH = {}, _INIT_CODE_HASH[ChainId.MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[ChainId.ROPSTEN] = '0x8b4ce8ec78a7c1be0d482d641f59b942070725a4b7782595db30956c6d46e824', _INIT_CODE_HASH[ChainId.RINKEBY] = '', _INIT_CODE_HASH[ChainId.GÖRLI] = '', _INIT_CODE_HASH[ChainId.KOVAN] = '', _INIT_CODE_HASH[ChainId.BSC_MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[ChainId.BSC_TESTNET] = '0xa2fc6518f951a78f4471cdce2fab0cdc29a140de76162b95abdac683684c2d91', _INIT_CODE_HASH);
 var MINIMUM_LIQUIDITY = /*#__PURE__*/JSBI.BigInt(1000); // exports for internal consumption
 
 var ZERO = /*#__PURE__*/JSBI.BigInt(0);
@@ -823,28 +823,12 @@ var Pair = /*#__PURE__*/function () {
 
     if (JSBI.equal(this.reserve0.raw, ZERO) || JSBI.equal(this.reserve1.raw, ZERO)) {
       throw new InsufficientReservesError();
-    } // const isBNB = this.token0.symbol === 'WBNB'
-    // const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
-    // const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-    // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-    // const outputAmount = new TokenAmount(
-    //   inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
-    //   JSBI.divide(numerator, denominator)
-    // )
-
+    }
 
     var inputReserve = this.reserveOf(inputAmount.token);
-    var outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0); // let outputReserve: any
-    // try {
-    //   outputReserve = this.reserveOf(WETH[97])
-    // } catch (err) {
-    //   outputReserve = this.reserveOf(inputAmount.token)
-    // }
-
-    var inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975); // const inputAmountWithFee = inputAmount.raw
-
-    var numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw); // const denominator = JSBI.add(inputReserve.raw, inputAmountWithFee)
-
+    var outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0);
+    var inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975);
+    var numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw);
     var denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee);
     var outputAmount = new TokenAmount(inputAmount.token.equals(this.token0) ? this.token1 : this.token0, JSBI.divide(numerator, denominator));
 
@@ -862,13 +846,7 @@ var Pair = /*#__PURE__*/function () {
       throw new InsufficientReservesError();
     }
 
-    var outputReserve = this.reserveOf(outputAmount.token); // let inputReserve: any
-    // try {
-    //   inputReserve = this.reserveOf(WETH[97])
-    // } catch (err) {
-    //   inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-    // }
-
+    var outputReserve = this.reserveOf(outputAmount.token);
     var inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0);
     var numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000);
     var denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _9975);
@@ -1429,8 +1407,6 @@ var Router = /*#__PURE__*/function () {
     });
     var deadline = "0x" + (Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16);
     var useFeeOnTransfer = Boolean(options.feeOnTransfer);
-    var fee = options === null || options === void 0 ? void 0 : options.fee;
-    console.log(fee);
     var methodName;
     var args;
     var value;
@@ -1445,29 +1421,13 @@ var Router = /*#__PURE__*/function () {
         } else if (etherOut) {
           methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'; // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
 
-          args = [amountIn, amountOut, path, to, deadline]; // value = `0x${(2500000000000000).toString(16)}`
-          // value = JSBI.multiply(amountOut, _9975)
-          // const inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25))
-          // value = `0x${
-          //   // JSBI.subtract(
-          //   // trade.maximumAmountIn(options.allowedSlippage).raw,
-          //   JSBI.divide(inputAmountWithFee, JSBI.BigInt(10000))
-          //     // )
-          //     .toString(16)
-          // }`
-          // console.log(value)
-          // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-          // const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-          // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-          // value = `0x${(parseInt(amountOut) - (parseInt(amountOut) * 9975) / 10000).toString(16)}`
-
-          value = fee ? fee : ZERO_HEX; // value = ZERO_HEX
+          args = [amountIn, amountOut, path, to, deadline];
+          value = ZERO_HEX;
         } else {
           methodName = useFeeOnTransfer ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens' : 'swapExactTokensForTokens'; // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
 
-          args = [amountIn, amountOut, path, to, deadline]; // value = ZERO_HEX
-
-          value = fee ? fee : ZERO_HEX;
+          args = [amountIn, amountOut, path, to, deadline];
+          value = ZERO_HEX;
         }
 
         break;
@@ -1483,15 +1443,13 @@ var Router = /*#__PURE__*/function () {
         } else if (etherOut) {
           methodName = 'swapTokensForExactETH'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
 
-          args = [amountOut, amountIn, path, to, deadline]; // value = ZERO_HEX
-
-          value = fee ? fee : ZERO_HEX;
+          args = [amountOut, amountIn, path, to, deadline];
+          value = ZERO_HEX;
         } else {
           methodName = 'swapTokensForExactTokens'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
 
-          args = [amountOut, amountIn, path, to, deadline]; // value = ZERO_HEX
-
-          value = fee ? fee : ZERO_HEX;
+          args = [amountOut, amountIn, path, to, deadline];
+          value = ZERO_HEX;
         }
 
         break;

@@ -21,7 +21,6 @@ export interface TradeOptions {
      * Whether any of the tokens in the path are fee on transfer tokens, which should be handled with special methods
      */
     feeOnTransfer?: boolean;
-    fee?: string;
 }
 /**
  * The parameters to use in the call to the Uniswap V2 Router to execute a trade.

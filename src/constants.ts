@@ -10,18 +10,18 @@ export enum ChainId {
   GÖRLI = 5,
   KOVAN = 42,
   BSC_MAINNET = 56,
-  BSC_TESTNET = 97,
+  BSC_TESTNET = 97
 }
 
 export enum TradeType {
   EXACT_INPUT,
-  EXACT_OUTPUT,
+  EXACT_OUTPUT
 }
 
 export enum Rounding {
   ROUND_DOWN,
   ROUND_HALF_UP,
-  ROUND_UP,
+  ROUND_UP
 }
 
 type ChainAddress = {
@@ -34,7 +34,7 @@ export const FACTORY_ADDRESS: ChainAddress = {
   [ChainId.GÖRLI]: '',
   [ChainId.KOVAN]: '',
   [ChainId.BSC_MAINNET]: '0x86A859773cf6df9C8117F20b0B950adA84e7644d',
-  [ChainId.BSC_TESTNET]: '0x8B9cfC2b1bCE8BD98e829858f923451FC4aE75Fe',
+  [ChainId.BSC_TESTNET]: '0xbdbD5304508C4A38935f5E9FC9D2C1Fa8C2D2bb8'
 }
 
 export const INIT_CODE_HASH: ChainAddress = {
@@ -44,7 +44,7 @@ export const INIT_CODE_HASH: ChainAddress = {
   [ChainId.GÖRLI]: '',
   [ChainId.KOVAN]: '',
   [ChainId.BSC_MAINNET]: '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670',
-  [ChainId.BSC_TESTNET]: '0x6b196bce7ffe32f3dd0bcae8f4b45fa72128dc0e25b88461174d085751e94d71',
+  [ChainId.BSC_TESTNET]: '0xa2fc6518f951a78f4471cdce2fab0cdc29a140de76162b95abdac683684c2d91'
 }
 
 export const MINIMUM_LIQUIDITY = JSBI.BigInt(1000)
@@ -62,10 +62,10 @@ export const _10000 = JSBI.BigInt(10000)
 
 export enum SolidityType {
   uint8 = 'uint8',
-  uint256 = 'uint256',
+  uint256 = 'uint256'
 }
 
 export const SOLIDITY_TYPE_MAXIMA = {
   [SolidityType.uint8]: JSBI.BigInt('0xff'),
-  [SolidityType.uint256]: JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'),
+  [SolidityType.uint256]: JSBI.BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 }

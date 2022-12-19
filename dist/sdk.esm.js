@@ -39,8 +39,8 @@ var Rounding;
   Rounding[Rounding["ROUND_UP"] = 2] = "ROUND_UP";
 })(Rounding || (Rounding = {}));
 
-var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[ChainId.MAINNET] = '0x26023843814cFF92B8d75311d64D1C032b8b29f2', _FACTORY_ADDRESS[ChainId.ROPSTEN] = '0xDfD8bbA37423950bD8050C65E698610C57E55cea', _FACTORY_ADDRESS[ChainId.RINKEBY] = '', _FACTORY_ADDRESS[ChainId.GÖRLI] = '', _FACTORY_ADDRESS[ChainId.KOVAN] = '', _FACTORY_ADDRESS[ChainId.BSC_MAINNET] = '0x86A859773cf6df9C8117F20b0B950adA84e7644d', _FACTORY_ADDRESS[ChainId.BSC_TESTNET] = '0x8B9cfC2b1bCE8BD98e829858f923451FC4aE75Fe', _FACTORY_ADDRESS);
-var INIT_CODE_HASH = (_INIT_CODE_HASH = {}, _INIT_CODE_HASH[ChainId.MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[ChainId.ROPSTEN] = '0x8b4ce8ec78a7c1be0d482d641f59b942070725a4b7782595db30956c6d46e824', _INIT_CODE_HASH[ChainId.RINKEBY] = '', _INIT_CODE_HASH[ChainId.GÖRLI] = '', _INIT_CODE_HASH[ChainId.KOVAN] = '', _INIT_CODE_HASH[ChainId.BSC_MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[ChainId.BSC_TESTNET] = '0x6b196bce7ffe32f3dd0bcae8f4b45fa72128dc0e25b88461174d085751e94d71', _INIT_CODE_HASH);
+var FACTORY_ADDRESS = (_FACTORY_ADDRESS = {}, _FACTORY_ADDRESS[ChainId.MAINNET] = '0x26023843814cFF92B8d75311d64D1C032b8b29f2', _FACTORY_ADDRESS[ChainId.ROPSTEN] = '0xDfD8bbA37423950bD8050C65E698610C57E55cea', _FACTORY_ADDRESS[ChainId.RINKEBY] = '', _FACTORY_ADDRESS[ChainId.GÖRLI] = '', _FACTORY_ADDRESS[ChainId.KOVAN] = '', _FACTORY_ADDRESS[ChainId.BSC_MAINNET] = '0x86A859773cf6df9C8117F20b0B950adA84e7644d', _FACTORY_ADDRESS[ChainId.BSC_TESTNET] = '0x0eef57EAE29DA890be9211c010F3e31d950fbE67', _FACTORY_ADDRESS);
+var INIT_CODE_HASH = (_INIT_CODE_HASH = {}, _INIT_CODE_HASH[ChainId.MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[ChainId.ROPSTEN] = '0x8b4ce8ec78a7c1be0d482d641f59b942070725a4b7782595db30956c6d46e824', _INIT_CODE_HASH[ChainId.RINKEBY] = '', _INIT_CODE_HASH[ChainId.GÖRLI] = '', _INIT_CODE_HASH[ChainId.KOVAN] = '', _INIT_CODE_HASH[ChainId.BSC_MAINNET] = '0x7fc48862bb659c6079c67f949053514afd141b7fcc1dc2b0a9474d647c51d670', _INIT_CODE_HASH[ChainId.BSC_TESTNET] = '0x058100cd6ec5f46d7d7d1e7084082fa4735355e21527487ff6a88c908174e2be', _INIT_CODE_HASH);
 var MINIMUM_LIQUIDITY = /*#__PURE__*/JSBI.BigInt(1000); // exports for internal consumption
 
 var ZERO = /*#__PURE__*/JSBI.BigInt(0);
@@ -50,8 +50,6 @@ var THREE = /*#__PURE__*/JSBI.BigInt(3);
 var FIVE = /*#__PURE__*/JSBI.BigInt(5);
 var TEN = /*#__PURE__*/JSBI.BigInt(10);
 var _100 = /*#__PURE__*/JSBI.BigInt(100);
-var _9975 = /*#__PURE__*/JSBI.BigInt(9975);
-var _10000 = /*#__PURE__*/JSBI.BigInt(10000);
 var SolidityType;
 
 (function (SolidityType) {
@@ -823,29 +821,15 @@ var Pair = /*#__PURE__*/function () {
 
     if (JSBI.equal(this.reserve0.raw, ZERO) || JSBI.equal(this.reserve1.raw, ZERO)) {
       throw new InsufficientReservesError();
-    } // const isBNB = this.token0.symbol === 'WBNB'
-    // const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
-    // const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-    // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-    // const outputAmount = new TokenAmount(
-    //   inputAmount.token.equals(this.token0) ? this.token1 : this.token0,
-    //   JSBI.divide(numerator, denominator)
-    // )
-
+    }
 
     var inputReserve = this.reserveOf(inputAmount.token);
-    var outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0); // let outputReserve: any
-    // try {
-    //   outputReserve = this.reserveOf(WETH[97])
-    // } catch (err) {
-    //   outputReserve = this.reserveOf(inputAmount.token)
-    // }
+    var outputReserve = this.reserveOf(inputAmount.token.equals(this.token0) ? this.token1 : this.token0); // const inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975)
 
-    var inputAmountWithFee = JSBI.multiply(inputAmount.raw, _9975); // const inputAmountWithFee = inputAmount.raw
+    var inputAmountWithFee = inputAmount.raw;
+    var numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw);
+    var denominator = JSBI.add(inputReserve.raw, inputAmountWithFee); // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
 
-    var numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw); // const denominator = JSBI.add(inputReserve.raw, inputAmountWithFee)
-
-    var denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee);
     var outputAmount = new TokenAmount(inputAmount.token.equals(this.token0) ? this.token1 : this.token0, JSBI.divide(numerator, denominator));
 
     if (JSBI.equal(outputAmount.raw, ZERO)) {
@@ -862,16 +846,12 @@ var Pair = /*#__PURE__*/function () {
       throw new InsufficientReservesError();
     }
 
-    var outputReserve = this.reserveOf(outputAmount.token); // let inputReserve: any
-    // try {
-    //   inputReserve = this.reserveOf(WETH[97])
-    // } catch (err) {
-    //   inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0)
-    // }
+    var outputReserve = this.reserveOf(outputAmount.token);
+    var inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0); // const numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000)
+    // const denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _9975)
 
-    var inputReserve = this.reserveOf(outputAmount.token.equals(this.token0) ? this.token1 : this.token0);
-    var numerator = JSBI.multiply(JSBI.multiply(inputReserve.raw, outputAmount.raw), _10000);
-    var denominator = JSBI.multiply(JSBI.subtract(outputReserve.raw, outputAmount.raw), _9975);
+    var numerator = JSBI.multiply(inputReserve.raw, outputAmount.raw);
+    var denominator = JSBI.subtract(outputReserve.raw, outputAmount.raw);
     var inputAmount = new TokenAmount(outputAmount.token.equals(this.token0) ? this.token1 : this.token0, JSBI.add(JSBI.divide(numerator, denominator), ONE));
     return [inputAmount, new Pair(inputReserve.add(inputAmount), outputReserve.subtract(outputAmount))];
   };
@@ -1396,12 +1376,12 @@ var Trade = /*#__PURE__*/function () {
 
 function toHex(currencyAmount) {
   return "0x" + currencyAmount.raw.toString(16);
-}
+} // const ZERO_HEX = '0x0'
 
-var ZERO_HEX = '0x0';
 /**
  * Represents the Uniswap V2 Router, and has static methods for helping execute trades.
  */
+
 
 var Router = /*#__PURE__*/function () {
   /**
@@ -1416,21 +1396,32 @@ var Router = /*#__PURE__*/function () {
 
 
   Router.swapCallParameters = function swapCallParameters(trade, options) {
+    var _options$ethFee;
+
     var etherIn = trade.inputAmount.currency === ETHER;
     var etherOut = trade.outputAmount.currency === ETHER; // the router does not support both ether in and out
 
     !!(etherIn && etherOut) ? process.env.NODE_ENV !== "production" ? invariant(false, 'ETHER_IN_OUT') : invariant(false) : void 0;
     !(options.ttl > 0) ? process.env.NODE_ENV !== "production" ? invariant(false, 'TTL') : invariant(false) : void 0;
+    !('ethFee' in options && ((_options$ethFee = options.ethFee) === null || _options$ethFee === void 0 ? void 0 : _options$ethFee.currency) === ETHER) ? process.env.NODE_ENV !== "production" ? invariant(false) : invariant(false) : void 0;
     var to = validateAndParseAddress(options.recipient);
-    var amountIn = toHex(trade.maximumAmountIn(options.allowedSlippage));
-    var amountOut = toHex(trade.minimumAmountOut(options.allowedSlippage));
+    var amountInCurrency = trade.maximumAmountIn(options.allowedSlippage);
+    var amountIn = toHex(amountInCurrency);
+    var amountOutCurrency = trade.minimumAmountOut(options.allowedSlippage);
+    var amountOut = toHex(amountOutCurrency);
     var path = trade.route.path.map(function (token) {
       return token.address;
     });
-    var deadline = "0x" + (Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16);
-    var useFeeOnTransfer = Boolean(options.feeOnTransfer);
-    var fee = options === null || options === void 0 ? void 0 : options.fee;
-    console.log(fee);
+    var deadline = "0x" + (Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16); // const useFeeOnTransfer = Boolean(options.feeOnTransfer)
+
+    var ethFee = toHex(options.ethFee);
+    var safeSwapTrade = {
+      amountIn: amountIn,
+      amountOut: amountOut,
+      path: path,
+      to: to,
+      deadline: deadline
+    };
     var methodName;
     var args;
     var value;
@@ -1438,60 +1429,61 @@ var Router = /*#__PURE__*/function () {
     switch (trade.tradeType) {
       case TradeType.EXACT_INPUT:
         if (etherIn) {
-          methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'; // (uint amountOutMin, address[] calldata path, address to, uint deadline)
-
-          args = [amountOut, path, to, deadline];
-          value = amountIn;
+          // methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'
+          // (uint amountOutMin, address[] calldata path, address to, uint deadline)
+          // args = [amountOut, path, to, deadline]
+          // value = amountIn
+          methodName = 'swapExactETHForTokensWithFeeAmount';
+          args = [safeSwapTrade, ethFee];
+          value = toHex(amountInCurrency.add(options.ethFee));
         } else if (etherOut) {
-          methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'; // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-
-          args = [amountIn, amountOut, path, to, deadline]; // value = `0x${(2500000000000000).toString(16)}`
-          // value = JSBI.multiply(amountOut, _9975)
-          // const inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25))
-          // value = `0x${
-          //   // JSBI.subtract(
-          //   // trade.maximumAmountIn(options.allowedSlippage).raw,
-          //   JSBI.divide(inputAmountWithFee, JSBI.BigInt(10000))
-          //     // )
-          //     .toString(16)
-          // }`
-          // console.log(value)
-          // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-          // const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-          // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-          // value = `0x${(parseInt(amountOut) - (parseInt(amountOut) * 9975) / 10000).toString(16)}`
-
-          value = fee ? fee : ZERO_HEX; // value = ZERO_HEX
+          // methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
+          // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+          // args = [amountIn, amountOut, path, to, deadline]
+          // value = ZERO_HEX
+          methodName = 'swapExactTokensForETHAndTipAmount';
+          args = [safeSwapTrade];
+          value = ethFee;
         } else {
-          methodName = useFeeOnTransfer ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens' : 'swapExactTokensForTokens'; // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-
-          args = [amountIn, amountOut, path, to, deadline]; // value = ZERO_HEX
-
-          value = fee ? fee : ZERO_HEX;
+          // methodName = useFeeOnTransfer
+          //   ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens'
+          //   : 'swapExactTokensForTokens'
+          // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+          // args = [amountIn, amountOut, path, to, deadline]
+          // value = ZERO_HEX
+          methodName = 'swapExactTokensForTokensWithFeeAmount';
+          args = [safeSwapTrade];
+          value = ethFee;
         }
 
         break;
 
       case TradeType.EXACT_OUTPUT:
-        !!useFeeOnTransfer ? process.env.NODE_ENV !== "production" ? invariant(false, 'EXACT_OUT_FOT') : invariant(false) : void 0;
-
+        // invariant(!useFeeOnTransfer, 'EXACT_OUT_FOT')
         if (etherIn) {
-          methodName = 'swapETHForExactTokens'; // (uint amountOut, address[] calldata path, address to, uint deadline)
-
-          args = [amountOut, path, to, deadline];
-          value = amountIn;
+          // methodName = 'swapETHForExactTokens'
+          // (uint amountOut, address[] calldata path, address to, uint deadline)
+          // args = [amountOut, path, to, deadline]
+          // value = amountIn
+          methodName = 'swapETHForExactTokensWithFeeAmount';
+          args = [safeSwapTrade, ethFee];
+          value = toHex(amountInCurrency.add(options.ethFee));
         } else if (etherOut) {
-          methodName = 'swapTokensForExactETH'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-
-          args = [amountOut, amountIn, path, to, deadline]; // value = ZERO_HEX
-
-          value = fee ? fee : ZERO_HEX;
+          // methodName = 'swapTokensForExactETH'
+          // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+          // args = [amountOut, amountIn, path, to, deadline]
+          // value = ZERO_HEX
+          methodName = 'swapTokensForExactETHAndFeeAmount';
+          args = [safeSwapTrade];
+          value = ethFee;
         } else {
-          methodName = 'swapTokensForExactTokens'; // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-
-          args = [amountOut, amountIn, path, to, deadline]; // value = ZERO_HEX
-
-          value = fee ? fee : ZERO_HEX;
+          // methodName = 'swapTokensForExactTokens'
+          // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
+          // args = [amountOut, amountIn, path, to, deadline]
+          // value = ZERO_HEX
+          methodName = 'swapTokensForExactTokensWithFeeAmount';
+          args = [safeSwapTrade];
+          value = ethFee;
         }
 
         break;

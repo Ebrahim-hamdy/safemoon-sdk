@@ -1,4 +1,4 @@
-import { Percent, Trade } from './entities';
+import { CurrencyAmount, Percent, Trade } from './entities';
 /**
  * Options for producing the arguments to send call to the router.
  */
@@ -21,7 +21,17 @@ export interface TradeOptions {
      * Whether any of the tokens in the path are fee on transfer tokens, which should be handled with special methods
      */
     feeOnTransfer?: boolean;
-    fee?: string;
+    /**
+     * ETH fee for swap
+     */
+    ethFee?: CurrencyAmount;
+}
+export interface SafeSwapTrade {
+    amountIn: string;
+    amountOut: string;
+    path: string[];
+    to: string;
+    deadline: string;
 }
 /**
  * The parameters to use in the call to the Uniswap V2 Router to execute a trade.
@@ -34,7 +44,7 @@ export interface SwapParameters {
     /**
      * The arguments to pass to the method, all hex encoded.
      */
-    args: (string | string[])[];
+    args: (string | string[] | SafeSwapTrade)[];
     /**
      * The amount of wei to send in hex.
      */

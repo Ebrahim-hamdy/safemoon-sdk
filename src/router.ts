@@ -1,6 +1,5 @@
 import { TradeType } from './constants'
 import invariant from 'tiny-invariant'
-// import JSBI from 'jsbi'
 import { validateAndParseAddress } from './utils'
 import { CurrencyAmount, ETHER, Percent, Trade } from './entities'
 
@@ -28,7 +27,18 @@ export interface TradeOptions {
    */
   feeOnTransfer?: boolean
 
-  fee?: string
+  /**
+   * ETH fee for swap
+   */
+  ethFee?: CurrencyAmount
+}
+
+export interface SafeSwapTrade {
+  amountIn: string
+  amountOut: string
+  path: string[]
+  to: string
+  deadline: string
 }
 
 /**
@@ -42,7 +52,7 @@ export interface SwapParameters {
   /**
    * The arguments to pass to the method, all hex encoded.
    */
-  args: (string | string[])[]
+  args: (string | string[] | SafeSwapTrade)[]
   /**
    * The amount of wei to send in hex.
    */
@@ -53,7 +63,7 @@ function toHex(currencyAmount: CurrencyAmount) {
   return `0x${currencyAmount.raw.toString(16)}`
 }
 
-const ZERO_HEX = '0x0'
+// const ZERO_HEX = '0x0'
 
 /**
  * Represents the Uniswap V2 Router, and has static methods for helping execute trades.
@@ -74,77 +84,80 @@ export abstract class Router {
     // the router does not support both ether in and out
     invariant(!(etherIn && etherOut), 'ETHER_IN_OUT')
     invariant(options.ttl > 0, 'TTL')
+    invariant('ethFee' in options && options.ethFee?.currency === ETHER)
 
     const to: string = validateAndParseAddress(options.recipient)
-    const amountIn: string = toHex(trade.maximumAmountIn(options.allowedSlippage))
-    const amountOut: string = toHex(trade.minimumAmountOut(options.allowedSlippage))
+    const amountInCurrency = trade.maximumAmountIn(options.allowedSlippage)
+    const amountIn: string = toHex(amountInCurrency)
+    const amountOutCurrency = trade.minimumAmountOut(options.allowedSlippage)
+    const amountOut: string = toHex(amountOutCurrency)
     const path: string[] = trade.route.path.map(token => token.address)
     const deadline = `0x${(Math.floor(new Date().getTime() / 1000) + options.ttl).toString(16)}`
-    const useFeeOnTransfer = Boolean(options.feeOnTransfer)
-    const fee = options?.fee
-    console.log(fee)
+    // const useFeeOnTransfer = Boolean(options.feeOnTransfer)
+    const ethFee = toHex(options.ethFee)
+
+    const safeSwapTrade: SafeSwapTrade = { amountIn, amountOut, path, to, deadline }
 
     let methodName: string
-    let args: (string | string[])[]
+    let args: (string | string[] | SafeSwapTrade)[]
     let value: string
     switch (trade.tradeType) {
       case TradeType.EXACT_INPUT:
         if (etherIn) {
-          methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'
+          // methodName = useFeeOnTransfer ? 'swapExactETHForTokensSupportingFeeOnTransferTokens' : 'swapExactETHForTokens'
           // (uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline]
-          value = amountIn
+          // args = [amountOut, path, to, deadline]
+          // value = amountIn
+          methodName = 'swapExactETHForTokensWithFeeAmount'
+          args = [safeSwapTrade, ethFee]
+          value = toHex(amountInCurrency.add(options.ethFee))
         } else if (etherOut) {
-          methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
+          // methodName = useFeeOnTransfer ? 'swapExactTokensForETHSupportingFeeOnTransferTokens' : 'swapExactTokensForETH'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline]
-          // value = `0x${(2500000000000000).toString(16)}`
-          // value = JSBI.multiply(amountOut, _9975)
-          // const inputAmountWithFee = JSBI.multiply(trade.maximumAmountIn(options.allowedSlippage).raw, JSBI.BigInt(25))
-          // value = `0x${
-          //   // JSBI.subtract(
-          //   // trade.maximumAmountIn(options.allowedSlippage).raw,
-          //   JSBI.divide(inputAmountWithFee, JSBI.BigInt(10000))
-          //     // )
-          //     .toString(16)
-          // }`
-          // console.log(value)
-
-          // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-          // const numerator = JSBI.multiply(inputAmountWithFee, outputReserve.raw)
-          // const denominator = JSBI.add(JSBI.multiply(inputReserve.raw, _10000), inputAmountWithFee)
-          // value = `0x${(parseInt(amountOut) - (parseInt(amountOut) * 9975) / 10000).toString(16)}`
-          value = fee ? fee : ZERO_HEX
+          // args = [amountIn, amountOut, path, to, deadline]
           // value = ZERO_HEX
+          methodName = 'swapExactTokensForETHAndTipAmount'
+          args = [safeSwapTrade]
+          value = ethFee
         } else {
-          methodName = useFeeOnTransfer
-            ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens'
-            : 'swapExactTokensForTokens'
+          // methodName = useFeeOnTransfer
+          //   ? 'swapExactTokensForTokensSupportingFeeOnTransferTokens'
+          //   : 'swapExactTokensForTokens'
           // (uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-          args = [amountIn, amountOut, path, to, deadline]
+          // args = [amountIn, amountOut, path, to, deadline]
           // value = ZERO_HEX
-          value = fee ? fee : ZERO_HEX
+          methodName = 'swapExactTokensForTokensWithFeeAmount'
+          args = [safeSwapTrade]
+          value = ethFee
         }
         break
       case TradeType.EXACT_OUTPUT:
-        invariant(!useFeeOnTransfer, 'EXACT_OUT_FOT')
+        // invariant(!useFeeOnTransfer, 'EXACT_OUT_FOT')
         if (etherIn) {
-          methodName = 'swapETHForExactTokens'
+          // methodName = 'swapETHForExactTokens'
           // (uint amountOut, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline]
-          value = amountIn
+          // args = [amountOut, path, to, deadline]
+          // value = amountIn
+          methodName = 'swapETHForExactTokensWithFeeAmount'
+          args = [safeSwapTrade, ethFee]
+          value = toHex(amountInCurrency.add(options.ethFee))
         } else if (etherOut) {
-          methodName = 'swapTokensForExactETH'
+          // methodName = 'swapTokensForExactETH'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline]
+          // args = [amountOut, amountIn, path, to, deadline]
           // value = ZERO_HEX
-          value = fee ? fee : ZERO_HEX
+
+          methodName = 'swapTokensForExactETHAndFeeAmount'
+          args = [safeSwapTrade]
+          value = ethFee
         } else {
-          methodName = 'swapTokensForExactTokens'
+          // methodName = 'swapTokensForExactTokens'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline]
+          // args = [amountOut, amountIn, path, to, deadline]
           // value = ZERO_HEX
-          value = fee ? fee : ZERO_HEX
+          methodName = 'swapTokensForExactTokensWithFeeAmount'
+          args = [safeSwapTrade]
+          value = ethFee
         }
         break
     }
